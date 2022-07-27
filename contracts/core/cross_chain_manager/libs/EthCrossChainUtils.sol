@@ -2,6 +2,8 @@ pragma solidity ^0.5.0;
 import "./../../../libs/common/ZeroCopySource.sol";
 import "./../../../libs/common/ZeroCopySink.sol";
 import "./../../../libs/utils/Utils.sol";
+import "../interface/ICrypto.sol";
+
 library ECCUtils {
     struct Header {
         uint32 version;
@@ -35,6 +37,7 @@ library ECCUtils {
 
     uint constant POLYCHAIN_PUBKEY_LEN = 67;
     uint constant POLYCHAIN_SIGNATURE_LEN = 65;
+    ICrypto constant Crypto = ICrypto(address(0x5006));
 
     /* @notice                  Verify Poly chain transaction whether exist or not
     *  @param _auditPath        Poly chain merkle proof
@@ -80,7 +83,7 @@ library ECCUtils {
          for(uint i = 0; i < _keyLen; i++){
              publicKey = Utils.slice(_pubKeyList, i*POLYCHAIN_PUBKEY_LEN, POLYCHAIN_PUBKEY_LEN);
              buff =  abi.encodePacked(buff, ZeroCopySink.WriteVarBytes(Utils.compressMCPubKey(publicKey)));
-             hash = keccak256(Utils.slice(publicKey, 3, 64));
+             hash = Crypto.keccak256Hash(Utils.slice(publicKey, 3, 64));
              keepers[i] = address(uint160(uint256(hash)));
          }
 
